@@ -586,7 +586,7 @@ def data_get_basics(data, default_title="*[untitled]*", default_kind="*[unknown]
         basics['examples'] = "- " + "\n- ".join(["`"+str(x)+"`" for x in data['examples']])
     return basics
 
-def set_definition_to_md_inner(prop, inner, indent, linksuffix=""):
+def set_definition_to_md_inner(prop, inner, base_id, indent, linksuffix=""):
     inner_basics = data_get_basics(inner)
     kind = inner_basics['kind']
 
@@ -596,8 +596,9 @@ def set_definition_to_md_inner(prop, inner, indent, linksuffix=""):
         title = inner['title'] if 'title' in inner else prop
         if title.lower() != prop.lower():
             title = title + " ("+prop+")"
-        base=urllib.parse.urlparse(inner['$id'])
+        base=urllib.parse.urlparse(base_id)
         target=urllib.parse.urlparse(inner['$id'])
+        print("HERE",base.netloc, target.netloc)
         if base.netloc == target.netloc:
             base_dir='.'+posixpath.dirname(base.path)
             target='.'+target.path
@@ -685,7 +686,7 @@ def set_definition_to_md(data, args, level=0, linksuffix=""):
             s += "This "+basics['kind'] + " defines the following "+itemtype+":\n\n"
             for prop in data[itemtype].keys():
                 inner = data[itemtype][prop]
-                s += set_definition_to_md_inner(prop, inner, indent="", linksuffix=linksuffix)
+                s += set_definition_to_md_inner(prop, inner, data['$id'] if '$id' in data else '.', indent="", linksuffix=linksuffix)
 
     s += "\n"
     s += "**JSON definition:**\n"
