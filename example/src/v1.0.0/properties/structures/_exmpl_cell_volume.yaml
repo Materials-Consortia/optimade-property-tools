@@ -14,7 +14,7 @@ type:
   - "number"
   - "null"
 description: |-
-  The volume of the unit cell in in ångström cubed ($\AA^3$).
+  The volume of the unit cell in in ångström cubed (Å³).
 examples:
   - 42.0
 x-optimade-unit: "angstrom^3"

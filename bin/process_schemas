@@ -1,0 +1,10 @@
+#!/usr/bin/python3
+
+import sys, os
+
+current_path = os.path.realpath(os.path.dirname(__file__))
+modpath=os.path.normpath(os.path.join(current_path,'..','src'))
+sys.path.insert(0,modpath)
+
+from process_schemas import main
+sys.exit(main())

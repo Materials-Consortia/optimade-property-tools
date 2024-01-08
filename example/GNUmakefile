@@ -8,12 +8,19 @@
 .PHONY: all
 all: schemas
 
-# You may need to edit these paths to reference the right versions
-PROCESS_SCHEMAS=../../tests/scripts/process_schemas.py
-RESOLVE_PATHS_ARGS=--resolve-path ../output/
-META_SCHEMA_PATH=../output/meta/v1.2
+# You may need to edit these configuration options
+# Path to the process_schemas program
+PROCESS_SCHEMAS=../bin/process_schemas
+# Path to the OPTIMADE specification schemas folder
+OPTIMADE_SCHEMAS_DIR=../../OPTIMADE/schemas
+# The base of the URI for the generated property definitions
 BASEID=https://example.org/schemas/v1.0/
+# The versioned directory being processed
 BASEDIR=src/v1.0.0
+
+# You probably do not need to edit these
+META_SCHEMA_PATH=$(OPTIMADE_REPO_DIR)/output/meta/v1.2
+RESOLVE_PATHS_ARGS=--resolve-path $(OPTIMADE_SCHEMAS_DIR)/output/
 
 ifeq ($(origin schemas_html_pretty), undefined)
 	OPTIMADE_HTML_HEADER ?=

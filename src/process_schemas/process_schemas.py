@@ -596,13 +596,12 @@ def set_definition_to_md_inner(prop, inner, indent, linksuffix=""):
         title = inner['title'] if 'title' in inner else prop
         if title.lower() != prop.lower():
             title = title + " ("+prop+")"
-        if '$id' in data:
-            base=urllib.parse.urlparse(data['$id'])
-            target=urllib.parse.urlparse(inner['$id'])
-            if base.netloc == target.netloc:
-                base_dir='.'+posixpath.dirname(base.path)
-                target='.'+target.path
-                url = posixpath.relpath(target,start=base_dir)
+        base=urllib.parse.urlparse(inner['$id'])
+        target=urllib.parse.urlparse(inner['$id'])
+        if base.netloc == target.netloc:
+            base_dir='.'+posixpath.dirname(base.path)
+            target='.'+target.path
+            url = posixpath.relpath(target,start=base_dir)
         s += indent + "* **["+title+"]("+url+linksuffix+")** ("+kind+") - [`"+inner['$id']+"`]("+inner['$id']+linksuffix+")  \n"
         s += indent + "  "+inner_basics['description_short']
         if 'x-optimade-requirements' in inner:
@@ -1393,7 +1392,7 @@ def process_dir(source_dir, bases, subs, args):
     return alldata
 
 
-if __name__ == "__main__":
+def main():
 
     try:
 
@@ -1489,3 +1488,7 @@ if __name__ == "__main__":
         else:
             print(e)
             exit(1)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
