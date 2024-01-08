@@ -598,7 +598,6 @@ def set_definition_to_md_inner(prop, inner, base_id, indent, linksuffix=""):
             title = title + " ("+prop+")"
         base=urllib.parse.urlparse(base_id)
         target=urllib.parse.urlparse(inner['$id'])
-        print("HERE",base.netloc, target.netloc)
         if base.netloc == target.netloc:
             base_dir='.'+posixpath.dirname(base.path)
             target='.'+target.path
