@@ -6,7 +6,8 @@ x-optimade-definition:
   kind: "property"
   version: "1.0.0"
   format: "1.2"
-  name: "magnetic_moment"
+  name: "_exmpl_magnetic_moment"
+  label: "_exmpl_magnetic_moment_structures"
 x-optimade-unit-definitions:
   - $$inherit: "/defs/v1.2/units/codata/1969/electromagnetic/bohrmagneton"
 type:

@@ -9,6 +9,7 @@ x-optimade-definition:
   format: "1.2"
   version: "1.0.0"
   name: "structures"
+  label: "structures_entrytype_exmpl"
 properties:
   id:
     x-optimade-implementation:

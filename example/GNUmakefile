@@ -12,15 +12,15 @@ all: schemas
 # Path to the process_schemas program
 PROCESS_SCHEMAS=../bin/process_schemas
 # Path to the OPTIMADE specification schemas folder
-OPTIMADE_SCHEMAS_DIR=../../OPTIMADE/schemas
+OPTIMADE_SCHEMAS_DIR=../../OPTIMADE/schemas/output
 # The base of the URI for the generated property definitions
 BASEID=https://example.org/schemas/v1.0/
 # The versioned directory being processed
 BASEDIR=src/v1.0.0
 
 # You probably do not need to edit these
-META_SCHEMA_PATH=$(OPTIMADE_REPO_DIR)/output/meta/v1.2
-RESOLVE_PATHS_ARGS=--resolve-path $(OPTIMADE_SCHEMAS_DIR)/output/
+META_SCHEMA_PATH=$(OPTIMADE_SCHEMAS_DIR)/meta/v1.2
+RESOLVE_PATHS_ARGS=--resolve-path $(OPTIMADE_SCHEMAS_DIR)
 
 ifeq ($(origin schemas_html_pretty), undefined)
 	OPTIMADE_HTML_HEADER ?=
@@ -42,7 +42,7 @@ else
 	SCHEMAS_HTML_EXT = .html
 endif
 
-EXT_SCHEMAS := $(filter-out ../../external/json-schema/LICENSE, $(wildcard ../../external/json-schema/*))
+EXT_SCHEMAS := $(filter-out ../external/json-schema/LICENSE, $(wildcard ../external/json-schema/*))
 EXT_SCHEMAS_ARGS := $(foreach schema,$(EXT_SCHEMAS),--schema $(schema))
 
 META_SCHEMAS_JSON := $(wildcard $(META_SCHEMA_PATH)/optimade/*.json)

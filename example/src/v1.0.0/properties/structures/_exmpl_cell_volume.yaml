@@ -8,6 +8,7 @@ x-optimade-definition:
   version: "1.0.0"
   format: "1.2"
   name: "_exmpl_cell_volume"
+  label: "_exmpl_cell_volume_structures"
 x-optimade-unit-definitions:
   - $$inherit: "/defs/v1.2/units/si/general/angstrom"
 type:
