@@ -689,7 +689,7 @@ def set_definition_to_md(data, args, level=0, linksuffix=""):
 
     s += "\n"
     s += "**JSON definition:**\n"
-    s += general_to_md(data, args, linksuffix=linksuffix)
+    s += general_to_md(data, args, linksuffix=".json")
 
     return s
 
@@ -745,7 +745,7 @@ def single_definition_to_md(data, args, level=0, linksuffix=""):
         basename = os.path.basename(data['$id'])
         s += "**Formats:** [[JSON]("+basename+".json)] [[MD]("+basename+".md)]\n\n"
     s += "**JSON definition:**\n"
-    s += general_to_md(data, args, linksuffix=linksuffix)
+    s += general_to_md(data, args, linksuffix=".json")
 
     return s
 
@@ -793,7 +793,7 @@ def schema_to_md(data, args, level=0, linksuffix=""):
     s += "This page documents a JSON Schema definition.\n\n"
 
     s += "**JSON definition:**\n"
-    s += general_to_md(data, args, linksuffix=linksuffix)
+    s += general_to_md(data, args, linksuffix=".json")
 
     return s
 
@@ -868,7 +868,7 @@ def property_definition_to_md(data, args, level=0, linksuffix=""):
         basename = os.path.basename(data['$id'])
         s += "**Formats:** [[JSON]("+basename+".json)] [[MD]("+basename+".md)]\n\n"
     s += "**JSON definition:**\n"
-    s += general_to_md(data, args, linksuffix=linksuffix)
+    s += general_to_md(data, args, linksuffix=".json")
 
     return s
 
