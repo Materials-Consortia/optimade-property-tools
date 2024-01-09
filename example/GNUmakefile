@@ -57,15 +57,15 @@ schemas: $(SCHEMAS_JSON) $(SCHEMAS_MD) $(SCHEMAS_HTML) $(INDEXES_HTML)
 
 output/%.json: src/%.yaml $(META_SCHEMAS_JSON)
 	mkdir -p "$(dir $@)"
-	$(PROCESS_SCHEMAS) --remove-null --clean-inner-schemas $(RESOLVE_PATHS_ARGS) --basedir "$(BASEDIR)" --baseid "$(BASEID)" $(META_SCHEMAS_ARGS) $(EXT_SCHEMAS_ARGS) --output "$@" "$<"
+	$(PROCESS_SCHEMAS) --remove-null $(RESOLVE_PATHS_ARGS) --basedir "$(BASEDIR)" --baseid "$(BASEID)" $(META_SCHEMAS_ARGS) $(EXT_SCHEMAS_ARGS) --output "$@" "$<"
 
 output/%.md: src/%.yaml
 	mkdir -p "$(dir $@)"
-	$(PROCESS_SCHEMAS) --remove-null --clean-inner-schemas -f md $(RESOLVE_PATHS_ARGS) --basedir "$(BASEDIR)" --baseid "$(BASEID)" --output "$@" "$<"
+	$(PROCESS_SCHEMAS) --remove-null -f md $(RESOLVE_PATHS_ARGS) --basedir "$(BASEDIR)" --baseid "$(BASEID)" --output "$@" "$<"
 
 $(SCHEMAS_HTML): output/%$(SCHEMAS_HTML_EXT): src/%.yaml
 	mkdir -p "$(dir $@)"
-	$(PROCESS_SCHEMAS) --remove-null --clean-inner-schemas -f html $(RESOLVE_PATHS_ARGS) --basedir "$(BASEDIR)" --baseid "$(BASEID)" --html-header '$(OPTIMADE_HTML_HEADER)' --html-top '$(OPTIMADE_HTML_TOP)' --output "$@" "$<"
+	$(PROCESS_SCHEMAS) --remove-null -f html $(RESOLVE_PATHS_ARGS) --basedir "$(BASEDIR)" --baseid "$(BASEID)" --html-header '$(OPTIMADE_HTML_HEADER)' --html-top '$(OPTIMADE_HTML_TOP)' --output "$@" "$<"
 
 output/%/index.html: src/% $(SCHEMAS)
 	mkdir -p "$(dir $@)"

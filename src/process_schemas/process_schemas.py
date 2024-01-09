@@ -55,11 +55,10 @@ arguments = [
         'type': str,
     },
     {
-        'names': ['--refs-mode'],
-        #'help': 'How to handle $ref references. Can also be set by a x-propdefs-ref-mode key alongside $ref. Also, the x-propdefs-inherit-ref key does a deep merge on the referenced definition.',
-        'help': argparse.SUPPRESS,
+        'names': ['--inherit-mode'],
+        'help': 'Modes for handling $$inherit',
         'choices': ["insert", "rewrite", "retain"],
-        'default': "retain",
+        'default': "insert",
     },
     {
         'names': ['-i', '--input-format'],
@@ -125,8 +124,8 @@ arguments = [
         'dest': 'verbosity', 'action': 'append_const', 'const': -1,
     },
     {
-        'names': ['-c', '--clean-inner-schemas'],
-        'help': 'Clean out inner $schema occurences',
+        'names': ['-c', '--dont-clean-inner-schemas'],
+        'help': 'Leave $schema and $$schema when processing $$inherit',
         'action': 'store_true',
         'default': False
     },
@@ -741,6 +740,12 @@ def single_definition_to_md(data, args, level=0, linksuffix=""):
             s += "- ["+resource["relation"]+"]("+resource["resource-id"]+")\n"
         s += "\n\n"
 
+    if 'compatibility' in data:
+        s += "**Compatibility:** (other definitions that are covered by the above definition)\n\n"
+        for item in data['compatibility']:
+            s += "- [`"+item+"`]("+item+linksuffix+")\n"
+        s += "\n\n"
+
     if '$id' in data:
         basename = os.path.basename(data['$id'])
         s += "**Formats:** [[JSON]("+basename+".json)] [[MD]("+basename+".md)]\n\n"
@@ -764,9 +769,8 @@ def general_to_md(data, args, level=0, linksuffix=""):
         A string representation of the input data.
     """
     import json
-
     s = "\n``` json\n"
-    s += json.dumps(data, indent=4)
+    s += output_str(data, "json", args)
     s += "\n```"
     return s
 
@@ -1029,14 +1033,18 @@ def output_str(data, output_format, args):
 
     if output_format == "json":
         import json
-        return json.dumps(data, indent=4)
+        return json.dumps( { k if k != '$$schema' else '$schema': v if k != '$$schema' else v + ".json" for k, v in data.items() }, indent=4)
+
     elif output_format == "yaml":
         import yaml
-        return yaml.dump(data)
+        return json.dumps({ k if k != '$$schema' else '$schema': v if k != '$$schema' else v + ".yaml" for k, v in data.items() }, indent=4)
+
     elif output_format == "md":
         return data_to_md(data, args, linksuffix=".md")
+
     elif output_format == "html":
         return data_to_html(data, args)
+
     else:
         raise Exception("Unknown output format: "+str(output_format))
 
@@ -1161,7 +1169,7 @@ def handle_inherit(ref, mode, bases, subs, args, origin=None):
         else:
             return data
     else:
-        raise Exception("Internal error: unexpected refs_mode: "+str(refs_mode))
+        raise Exception("Internal error: unexpected inherit-mode: "+str(inherit_mode))
 
 
 def merge_deep(d, other, replace=True):
@@ -1232,13 +1240,19 @@ def handle_all(data, bases, subs, args, level, origin=None):
 
                 logging.debug("Handling $$inherit preprocessor directive: %s",inherit)
 
-                output = handle_inherit(inherit, "insert", bases, subs, args, origin=origin)
+                output = handle_inherit(inherit, args.inherit_mode, bases, subs, args, origin=origin)
                 if isinstance(output, dict):
                     # Handle the inherit recursively
                     newbases = bases.copy()
                     source = inherit_to_source(inherit, bases['self'], args.resolve_path, supported_input_formats)
                     newbases['self'] = os.path.dirname(source)
                     output = handle_all(output, newbases, subs, args, level=level+1, origin=source)
+
+                    if not args.dont_clean_inner_schemas:
+                        if '$schema' in output:
+                            del output['$schema']
+                        if '$$schema' in output:
+                            del output['$$schema']
 
             if '$$keep' in data:
                 logging.debug("Handling $$keep preprocessor directive: %s",data['$$keep'])
@@ -1263,13 +1277,6 @@ def handle_all(data, bases, subs, args, level, origin=None):
 
             merge_deep(data, output, replace=False)
             del data['$$inherit']
-
-        if '$$schema' in data:
-            data['$schema'] = data['$$schema']+"."+args.output_format
-            del data['$$schema']
-
-        if '$schema' in data and level > 0 and args.clean_inner_schemas:
-            del data['$schema']
 
         for k, v in list(data.items()):
             if isinstance(v, dict) or isinstance(v, list):
