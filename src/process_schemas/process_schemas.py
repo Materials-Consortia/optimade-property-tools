@@ -380,12 +380,14 @@ def sanity_check(instance, source, iid, bases, args):
         if 'kind' in instance['x-optimade-definition']:
             if instance['x-optimade-definition']['kind'] == 'unit':
                 # Check that approximate-relations -> base-units -> id are valid
-                if 'approximate-relations' in instance and 'base-units' in instance['approximate-relations']:
-                    for stanza in instance['approximate-relations']['base-units']:
-                         sanity_check_id(stanza['id'], bases, source_ext)
+                if 'approximate-relations' in instance:
+                    for iinstance in instance['approximate-relations']:
+                        if 'base-units' in iinstance:
+                            for stanza in iinstance['base-units']:
+                                sanity_check_id(stanza['id'], bases, source_ext)
                 if 'defining-relation' in instance and 'base-units' in instance['defining-relation']:
                     for stanza in instance['defining-relation']['base-units']:
-                         sanity_check_id(stanza['id'], bases, source_ext)
+                        sanity_check_id(stanza['id'], bases, source_ext)
                 if 'compatibility' in instance:
                     for compat_id in instance['compatibility']:
                          sanity_check_id(compat_id, bases, source_ext)
@@ -1458,7 +1460,7 @@ def main():
                 schema_data, ext = read_data(args.force_schema, "json")
                 validate(data, args, bases=bases, source=args.source, schema=args.force_schema)
 
-            if args.schema is not None and '$schema' in data:
+            if args.schema is not None and ('$schema' in data or '$$schema' in data):
                 schemas = {}
                 for schema in args.schema:
                     schema_data, ext = read_data(schema[0], "json")
@@ -1466,7 +1468,7 @@ def main():
                         schemas[schema_data['$id']] = schema_data
                     else:
                         raise Exception("Schema provided without $id field: "+str(schema_data))
-                validate(data, args, bases=bases, source=args.source, schemas=schemas)
+                validate({ k if k != '$$schema' else '$schema': v if k != '$$schema' else v + ".json" for k, v in data.items() }, args, bases=bases, source=args.source, schemas=schemas)
 
         except Exception as e:
             raise ExceptionWrapper("Validation of data failed", e) from e
