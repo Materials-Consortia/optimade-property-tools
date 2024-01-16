@@ -40,7 +40,8 @@ Dependencies:
 
 """
 
-import argparse, io, codecs, os, sys, logging, traceback, pprint, posixpath
+import argparse, io, codecs, os, sys, logging, traceback, pprint, posixpath, re
+from importlib import metadata
 from collections import OrderedDict
 import urllib.parse
 import urllib.request
@@ -396,12 +397,11 @@ def sanity_check(instance, source, iid, bases, args):
 
 def validate(instance, args, bases=None, source=None, schemas={}, schema=None, use_schema_field=False, run_sanity_check=True):
     import jsonschema
-    from jsonschema import RefResolver
-
-    # Block attempts to resolve schemas over the Internet, we only want to use Schemas present in the repository
-    class LocalOnlyRefResolver(RefResolver):
-        def resolve_remote(self, uri):
-            raise Exception("Validation: attempt to fetch remote schema over the internet blocked: "+str(uri))
+    try:
+        jsc_ver = tuple(int(x) for x in metadata.version("jsonschema").split('.'))
+    except Exception:
+        logging.warning("Could not determine jsonschema version")
+        jsc_ver = (0, 0, 0)
 
     if '$schema' in instance:
         schema_id = instance['$schema']
@@ -432,24 +432,41 @@ def validate(instance, args, bases=None, source=None, schemas={}, schema=None, u
     try:
         logging.debug("\n\n** Validating:**\n\n"+pprint.pformat(instance)+"\n\n** Using schema:**\n\n"+pprint.pformat(schema)+"\n\n")
 
-        resolver = LocalOnlyRefResolver.from_schema(schema=schema, store=schemas)
+        if jsc_ver >= (4, 18, 0):
+            # jsonschema 4.18.0 deprectates RefResolver, and from this version and forward
+            # there appear to be issues with using it
 
-        if use_schema_field:
-            if schema_id is not None:
-                validator = jsonschema.validators.validator_for(schema, default=_UNSET)
-            else:
-                raise Exception("Validation: asked to use $schema field to decide validator, but no such field present.")
+            from referencing import Registry
+            from referencing.jsonschema import DRAFT202012
+
+            resources = []
+            for resource_schema in schemas:
+                resources += [(resource_schema, DRAFT202012.create_resource(schemas[resource_schema]))]
+            registry = Registry().with_resources(resources)
+            validator = jsonschema.Draft202012Validator(schema=schema, format_checker=jsonschema.FormatChecker(), registry=registry)
+            validator.check_schema(schema)
+            validator.validate(instance)
+
         else:
+            # jsonschema ver < 4.18.0 does not support referencing, and uses RefResolver
+            # with the questionable default of resolving chemas over the Internet unless blocked.
+
+            from jsonschema import RefResolver
+            class LocalOnlyRefResolver(RefResolver):
+                def resolve_remote(self, uri):
+                    raise Exception("Validation: attempt to fetch remote schema over the internet blocked: "+str(uri))
+            resolver = LocalOnlyRefResolver.from_schema(schema=schema, store=schemas)
+            validator = None
             try:
                 validator = jsonschema.Draft202012Validator(schema=schema, format_checker=jsonschema.FormatChecker(), resolver=resolver)
             except AttributeError:
-                logging.warning("JSON Schema Python library is not aware of the Draft202012 standard. It is probably too old. Will validate using default validator.")
-                validator = None
+                logging.warning("JSON Schema Python library is not aware of the Draft202012 standard. It is probably too old (< 4). Will validate using default validator.")
 
-        if validator is not None:
-            validator.validate(instance)
-        else:
-            jsonschema.validate(instance=instance, schema=schema, format_checker=jsonschema.FormatChecker(), resolver=resolver)
+            if validator is not None:
+                validator.check_schema(schema)
+                validator.validate(instance)
+            else:
+                jsonschema.validate(instance=instance, schema=schema, format_checker=jsonschema.FormatChecker(), resolver=resolver)
 
     except jsonschema.ValidationError as e:
         logging.debug("Schema validation failed, full output:\n"+str(e))
