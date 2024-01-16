@@ -34,17 +34,22 @@ Examples:
 
 Dependencies:
 
-  - apt: `apt install python3-yaml python3-jsonschema python3-markdown python3-mdx-math python3-pygments`
+  - apt: `apt install python3-yaml python3-jsonschema python3-markdown python3-mdx-math python3-pygments python3-importlib-metadata`
   - pip: `pip install PyYAML jsonschema python-markdown python-markdown-math pygments`
   - conda: `conda install python=3 pyyaml jsonschema markdown python-markdown-math pygments
 
+(python3-importlib-metadata is only necessary for Python 3.8 or older)
 """
 
 import argparse, io, codecs, os, sys, logging, traceback, pprint, posixpath, re
-from importlib import metadata
 from collections import OrderedDict
 import urllib.parse
 import urllib.request
+
+try:
+    from importlib import metadata
+except ImportError:  # Python < 3.8, may require, e.g., python3-importlib-metadata
+    from importlib_metadata import metadata
 
 supported_input_formats = ['json', 'yaml']
 supported_output_formats = ["json", "yaml", "md", "html"]
