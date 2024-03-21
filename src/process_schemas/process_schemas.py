@@ -42,7 +42,7 @@ Dependencies:
 """
 
 import argparse, io, codecs, os, sys, logging, traceback, pprint, posixpath, re
-from collections import OrderedDict
+from collections import OrderedDict as StdLibOrderedDict
 import urllib.parse
 import urllib.request
 
@@ -50,6 +50,14 @@ try:
     from importlib import metadata
 except ImportError:  # Python < 3.8, may require, e.g., python3-importlib-metadata
     from importlib_metadata import metadata
+
+
+class OrderedDict(StdLibOrderedDict):
+    """Wrapper class that allows OrderedDict's to be rendered
+    with a more normal JSON-esque representation.
+    """
+    def __repr__(self):
+        return dict(self).__repr__()
 
 supported_input_formats = ['json', 'yaml']
 supported_output_formats = ["json", "yaml", "md", "html"]
