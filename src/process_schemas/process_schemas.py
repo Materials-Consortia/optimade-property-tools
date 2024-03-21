@@ -45,6 +45,7 @@ import argparse, io, codecs, os, sys, logging, traceback, pprint, posixpath, re
 from collections import OrderedDict
 import urllib.parse
 import urllib.request
+import json
 
 try:
     from importlib import metadata
@@ -548,7 +549,6 @@ def read_data(source, input_format='auto', preserve_order=True, origin=None):
                 return yaml.safe_load(reader), "yaml"
 
         if input_format == "json":
-            import json
             if preserve_order:
                 return json.load(reader, object_pairs_hook=OrderedDict), "json"
             else:
@@ -606,7 +606,7 @@ def data_get_basics(data, default_title="*[untitled]*", default_kind="*[unknown]
     if 'description' in data:
         basics['description_short'], sep, basics['description_details'] = [x.strip() for x in data['description'].partition('\n\n')]
     if 'examples' in data:
-        basics['examples'] = "- " + "\n- ".join(["`"+str(x)+"`" for x in data['examples']])
+        basics['examples'] = "- " + "\n- ".join(["`"+json.dumps(x)+"`" for x in data['examples']])
     return basics
 
 def set_definition_to_md_inner(prop, inner, base_id, indent, linksuffix=""):
@@ -792,7 +792,6 @@ def general_to_md(data, args, level=0, linksuffix=""):
     str
         A string representation of the input data.
     """
-    import json
     s = "\n``` json\n"
     s += output_str(data, "json", args)
     s += "\n```"
@@ -812,7 +811,6 @@ def schema_to_md(data, args, level=0, linksuffix=""):
     str
         A string representation of the input data.
     """
-    import json
     s = ""
 
     titlestr = (data['title'] + " (schema)") if 'title' in data else "Schema"
@@ -1056,7 +1054,6 @@ def output_str(data, output_format, args):
     """
 
     if output_format == "json":
-        import json
         return json.dumps( { k if k != '$$schema' else '$schema': v if k != '$$schema' else v + ".json" for k, v in data.items() }, indent=4)
 
     elif output_format == "yaml":
