@@ -14,7 +14,7 @@ Other ways to set up dependencies with the relevant package names:
 
 - apt: `apt install python3-yaml python3-jsonschema python3-markdown python3-mdx-math python3-pygments python3-importlib-metadata`
 - pip: `pip install PyYAML jsonschema markdown python-markdown-math pygments`
-- conda: `conda install python=3 pyyaml jsonschema markdown python-markdown-math pygments
+- conda: `conda install python=3 pyyaml jsonschema markdown python-markdown-math pygments`
 
 ## OPTIMADE Property Definitions
 
