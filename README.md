@@ -1,7 +1,20 @@
 # OPTIMADE Property Tools
 
 This reporty contains tools to work with OPTIMADE properties.
-The primary tool is `process_schemas`, which converts between different property definition formats.
+The primary tool is `process_schemas` (in the `bin` subdirectory), which converts between different property definition formats.
+
+The recommended way to set up the Python dependencies is via a virtual environment:
+```
+  python3 -m venv venv
+  venv/bin/pip3 install -r requirements.txt
+  source venv/bin/activate
+```
+
+Other ways to set up dependencies with the relevant package names:
+
+- apt: `apt install python3-yaml python3-jsonschema python3-markdown python3-mdx-math python3-pygments python3-importlib-metadata`
+- pip: `pip install PyYAML jsonschema markdown python-markdown-math pygments`
+- conda: `conda install python=3 pyyaml jsonschema markdown python-markdown-math pygments
 
 ## OPTIMADE Property Definitions
 
